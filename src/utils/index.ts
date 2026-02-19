@@ -13,3 +13,10 @@ export const showPictureSize = (size: number) => {
     return `${size}B`
   }
 }
+
+
+
+
+
+
+

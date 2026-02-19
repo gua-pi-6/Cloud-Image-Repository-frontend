@@ -69,7 +69,8 @@ const handleUpload = async ({ file }: any) => {
  * @param file 图片文件
  */
 const beforeUpload = (file: any) => {
-  const isJpgOrPng = file.type === 'image/jpg' || file.type === 'image/png'
+  console.log(file)
+  const isJpgOrPng = file.type === 'image/jpg' || file.type === 'image/jpeg' || file.type === 'image/png'
   if (!isJpgOrPng) {
     message.error('你只能  上传 JPG 或 PNG 文件!')
   }

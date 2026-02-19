@@ -10,6 +10,7 @@ import AddPictureBatchPage from '../pages/picture/AddPictureBatchPage.vue'
 import AddSpacePage from '../pages/space/AddSpacePage.vue'
 import MySpacePage from '../pages/space/MySpacePage.vue'
 import SearchPicturePage from '../pages/picture/SearchPicturePage.vue'
+import ExpansionImageByImage from '../pages/picture/ExpansionImageByImage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +70,12 @@ const router = createRouter({
       path: '/picture/search/:id',
       name: '以图识图',
       component: SearchPicturePage,
+      props: true,
+    },
+    {
+      path: '/expansion/picture/:id',
+      name: '以图扩图',
+      component: ExpansionImageByImage,
       props: true,
     },
   ],

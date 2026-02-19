@@ -197,7 +197,7 @@
             <!-- 添加 card-anim 类用于 GSAP 控制 -->
             <div class="art-card private-card card-anim">
               <div class="card-image-box">
-                <img :src="item.thumbnailUrl" :alt="item.name" />
+                <img @click="toPictureDetail(item.id)" :src="item.thumbnailUrl" :alt="item.name" />
                 <div class="private-actions">
                   <a-tooltip title="编辑">
                     <a-button @click="handleEdit(item)" shape="circle" class="icon-btn">
@@ -212,6 +212,11 @@
                   <a-tooltip title="以图识图">
                     <a-button @click="handleImageSearch(item)" shape="circle" class="icon-btn">
                       <search-outlined />
+                    </a-button>
+                  </a-tooltip>
+                  <a-tooltip title="以图扩图">
+                    <a-button @click="handleImageExpand(item)" shape="circle" class="icon-btn">
+                      <ExpandOutlined />
                     </a-button>
                   </a-tooltip>
                   <a-tooltip title="删除">
@@ -264,6 +269,7 @@ import {
   ShoppingOutlined,
   SmileOutlined,
   PictureOutlined,
+  ExpandOutlined,
   CloseCircleOutlined,
   EyeOutlined,
 } from '@ant-design/icons-vue'
@@ -314,6 +320,16 @@ const datePresets = [
   { key: 'month', label: '近30天', days: 30 },
   { key: 'quarter', label: '近3个月', days: 90 },
 ]
+
+// 跳转图片详情页
+const toPictureDetail = (id: number) => {
+  router.push(`/picture/${id}`)
+}
+
+// 以图扩图
+const handleImageExpand = (item: API.PictureVO) => {
+  router.push(`/expansion/picture/${item.id}`)
+}
 
 // 编辑图片
 const handleEdit = (item: API.PictureVO) => {

@@ -269,7 +269,7 @@ function handlePicClick(pic: API.ImageSearchResult) {
 
 /**
  * 点击下载按钮
- * TODO: 在此实现下载逻辑，例如调用后端接口或直接触发 a 标签下载
+ * 在此实现下载逻辑，例如调用后端接口或直接触发 a 标签下载
  */
 function handleDownload(pic: API.ImageSearchResult) {
   // 占位：逻辑待实现
