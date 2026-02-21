@@ -351,6 +351,7 @@ $shadow-lg: 0 8px 24px rgba(140, 123, 108, 0.15);
 }
 
 // ==================== 顶部导航 ====================
+
 .page-header {
   display: flex;
   align-items: center;
@@ -370,7 +371,6 @@ $shadow-lg: 0 8px 24px rgba(140, 123, 108, 0.15);
 
     &:hover {
       color: $primary-color;
-      transform: translateX(-5px);
     }
   }
 

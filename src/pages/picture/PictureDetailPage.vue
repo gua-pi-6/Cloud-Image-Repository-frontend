@@ -1,16 +1,15 @@
 <template>
   <div class="detail-page">
-    <div class="page-header">
+    <header class="page-header">
       <a-button type="text" @click="goBack" class="back-btn">
         <template #icon><arrow-left-outlined /></template>
         返回列表
       </a-button>
       <span class="header-title">图片详情</span>
-    </div>
+    </header>
 
     <div class="main-container" v-if="picture">
       <a-row :gutter="[24, 24]">
-
         <!-- 左侧：图片预览区 (保持不变) -->
         <a-col :xs="24" :lg="16" :xl="17">
           <div class="image-wrapper">
@@ -23,15 +22,14 @@
         <!-- 右侧：信息与操作区 -->
         <a-col :xs="24" :lg="8" :xl="7">
           <a-card class="info-card" :bordered="false">
-
             <div class="info-header">
               <h1 class="pic-title">{{ picture.name }}</h1>
               <div class="author-row">
                 <a-avatar size="small" style="background-color: #87d068">
                   <template #icon><user-outlined /></template>
                 </a-avatar>
-                <span class="author-name">{{ picture.user?.userName || '匿名用户'}}</span>
-<!--                <span class="upload-date">{{ picture.date }}</span>-->
+                <span class="author-name">{{ picture.user?.userName || '匿名用户' }}</span>
+                <!--                <span class="upload-date">{{ picture.date }}</span>-->
               </div>
             </div>
 
@@ -58,7 +56,12 @@
                   <template #icon><edit-outlined /></template>
                   编辑
                 </a-button>
-                <a-button v-if="mustRole(loginUser.userRole)" danger class="half-btn" @click="handleDelete">
+                <a-button
+                  v-if="mustRole(loginUser.userRole)"
+                  danger
+                  class="half-btn"
+                  @click="handleDelete"
+                >
                   <template #icon><delete-outlined /></template>
                   删除
                 </a-button>
@@ -71,12 +74,18 @@
             <div class="properties-section">
               <h3 class="section-title">图片属性</h3>
               <a-descriptions :column="1" size="small" bordered>
-                <a-descriptions-item label="文件格式"><a-tag color="blue">{{ picture.picFormat }}</a-tag></a-descriptions-item>
-                <a-descriptions-item label="分辨率">{{ picture.picWidth }} x {{ picture.picHeight }} px</a-descriptions-item>
+                <a-descriptions-item label="文件格式"
+                  ><a-tag color="blue">{{ picture.picFormat }}</a-tag></a-descriptions-item
+                >
+                <a-descriptions-item label="分辨率"
+                  >{{ picture.picWidth }} x {{ picture.picHeight }} px</a-descriptions-item
+                >
                 <a-descriptions-item label="比例">
-                  {{picture.picScale}}
+                  {{ picture.picScale }}
                 </a-descriptions-item>
-                <a-descriptions-item label="文件大小">{{ showPictureSize(picture.picSize) }}</a-descriptions-item>
+                <a-descriptions-item label="文件大小">{{
+                  showPictureSize(picture.picSize)
+                }}</a-descriptions-item>
               </a-descriptions>
             </div>
 
@@ -86,7 +95,6 @@
                 <a-tag v-for="tag in picture.tags" :key="tag" color="purple">{{ tag }}</a-tag>
               </div>
             </div>
-
           </a-card>
         </a-col>
       </a-row>
@@ -111,31 +119,35 @@
       </div>
     </a-drawer>
     <!-- =========================================== -->
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router'
 import {
-  ArrowLeftOutlined, UserOutlined, DownloadOutlined,
-  EditOutlined, DeleteOutlined, TagOutlined, DownOutlined
-} from '@ant-design/icons-vue';
-import { message, Modal } from 'ant-design-vue';
+  ArrowLeftOutlined,
+  UserOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  TagOutlined,
+  DownOutlined,
+} from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
 import { deletePictureUsingPost, getPictureVoByIdUsingGet } from '@/api/pictureController.js'
 import { saveAs } from 'file-saver'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { showPictureSize } from '@/utils/index.ts'
-const route = useRoute();
-const router = useRouter();
-const drawerVisible = ref(false); // 控制弹框
+const route = useRoute()
+const router = useRouter()
+const drawerVisible = ref(false) // 控制弹框
 const picture = ref<API.PictureVO>({})
 const loginUserStore = useLoginUserStore()
 const loginUser = loginUserStore.loginUser
 
 interface PictureId {
-  id: string;
+  id: string
 }
 
 const prop = defineProps<PictureId>()
@@ -159,39 +171,41 @@ const fetchDetail = async () => {
   } catch (e) {
     message.error(e.message)
   }
-};
+}
 
 /**
  * 打开详情抽屉
  */
 const openDrawer = () => {
-  drawerVisible.value = true;
-};
+  drawerVisible.value = true
+}
 
 /**
  * 回退到上一页
  */
-const goBack = () => { router.back(); };
+const goBack = () => {
+  router.back()
+}
 
 /**
  * 下载图片
  */
 const handleDownload = () => {
   saveAs(picture.value.url)
-};
+}
 
 /**
  * 编辑图片
  */
 const handleEdit = () => {
   router.push(`/creation/picture?id=${picture.value.id}`)
-};
+}
 
 /**
  * 效验角色
  */
-const mustRole = (role: string ='') => {
-  return role === 'admin' || loginUser.id === picture.value.userId;
+const mustRole = (role: string = '') => {
+  return role === 'admin' || loginUser.id === picture.value.userId
 }
 /**
  * 获取最小公约数
@@ -199,67 +213,197 @@ const mustRole = (role: string ='') => {
 // 1. 安全的 GCD 函数 (防止死循环核心)
 const gcd = (a: number, b: number): number => {
   // 关键点：必须使用 Math.round 强制转为整数
-  a = Math.round(a);
-  b = Math.round(b);
+  a = Math.round(a)
+  b = Math.round(b)
 
   while (b !== 0) {
-    const temp = b;
-    b = a % b;
-    a = temp;
+    const temp = b
+    b = a % b
+    a = temp
   }
-  return a;
-};
+  return a
+}
 
 /**
  * 删除图片
  */
 const handleDelete = () => {
   Modal.confirm({
-    title: '确认删除', content: '删除后无法恢复，确定要删除这张图片吗？',
-    okText: '确认删除', okType: 'danger', cancelText: '取消',
+    title: '确认删除',
+    content: '删除后无法恢复，确定要删除这张图片吗？',
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
     async onOk() {
-      const res = await deletePictureUsingPost({id: prop.id})
-      if(res.data.code === 0){
+      const res = await deletePictureUsingPost({ id: prop.id })
+      if (res.data.code === 0) {
         message.success('图片删除成功')
         router.push({
           path: '/',
           replace: true,
         })
       }
-    }
-  });
-};
+    },
+  })
+}
 
-onMounted(() => { fetchDetail(); });
+onMounted(() => {
+  fetchDetail()
+})
 </script>
 
 <style scoped>
 /* 原有样式保持不变... */
-.detail-page { min-height: 100vh; background-color: #f5f7fa; padding-bottom: 40px; }
-.page-header { height: 64px; background: #fff; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 24px; }
-.back-btn { color: #666; font-size: 15px; padding-left: 0; }
-.header-title { margin-left: 16px; font-size: 16px; color: #333; font-weight: 500; border-left: 1px solid #eee; padding-left: 16px; }
-.main-container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
-.image-wrapper { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); height: 100%; display: flex; justify-content: center; align-items: center; min-height: 500px; }
-.canvas-board { width: 100%; height: 100%; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
-.main-image :deep(.ant-image-img) { max-width: 100%; max-height: 80vh; object-fit: contain; display: block; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-.info-card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); height: 100%; }
-.pic-title { font-size: 20px; font-weight: 600; color: #1f1f1f; margin-bottom: 12px; line-height: 1.4; }
-.author-row { display: flex; align-items: center; color: #8c8c8c; font-size: 13px; margin-bottom: 16px; }
-.author-name { margin: 0 12px 0 8px; color: #333; font-weight: 500; }
-.action-group { display: flex; flex-direction: column; gap: 12px; }
-.secondary-actions { display: flex; gap: 12px; }
-.half-btn { flex: 1; }
-.properties-section { margin-bottom: 24px; }
-.section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333; }
-:deep(.ant-descriptions-item-label) { width: 100px; color: #8c8c8c; }
-:deep(.ant-descriptions-item-content) { font-weight: 500; color: #333; }
-.tags-section { display: flex; align-items: flex-start; margin-top: 16px; }
-.tag-icon { margin-right: 8px; color: #8c8c8c; margin-top: 4px; }
-.tags-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.loading-state { display: flex; justify-content: center; align-items: center; height: 60vh; }
+.detail-page {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding-bottom: 40px;
+}
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 64px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+.back-btn {
+  color: #666;
+  font-size: 15px;
+  padding-left: 0;
+}
+.header-title {
+  margin-left: 16px;
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+  border-left: 1px solid #eee;
+  padding-left: 16px;
+}
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.image-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+}
+.canvas-board {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:
+    linear-gradient(45deg, #eee 25%, transparent 25%),
+    linear-gradient(-45deg, #eee 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #eee 75%),
+    linear-gradient(-45deg, transparent 75%, #eee 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
+}
+.main-image :deep(.ant-image-img) {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+.info-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  height: 100%;
+}
+.pic-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.author-row {
+  display: flex;
+  align-items: center;
+  color: #8c8c8c;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.author-name {
+  margin: 0 12px 0 8px;
+  color: #333;
+  font-weight: 500;
+}
+.action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.secondary-actions {
+  display: flex;
+  gap: 12px;
+}
+.half-btn {
+  flex: 1;
+}
+.properties-section {
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+:deep(.ant-descriptions-item-label) {
+  width: 100px;
+  color: #8c8c8c;
+}
+:deep(.ant-descriptions-item-content) {
+  font-weight: 500;
+  color: #333;
+}
+.tags-section {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+.tag-icon {
+  margin-right: 8px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
 
 /* ============ 新增样式 ============ */
+
 .desc-section {
   margin-top: 16px;
   background: #f9f9f9;
