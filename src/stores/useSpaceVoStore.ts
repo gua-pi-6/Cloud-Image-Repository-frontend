@@ -11,12 +11,10 @@ export const useSpaceVoStore = defineStore('useSpaceVoStore', () => {
 
 
   const fetchSpaceVo = async () => {
-    if(!spaceVo.value.id){
       const res = await getSpaceVoUsingPost()
       if (res?.data.code === 0 && res?.data.data){
         spaceVo.value = res.data.data
       }
-    }
   }
 
   const setSpaceVo = async (newSpaceVo: API.SpaceVO) => {

@@ -353,7 +353,8 @@ const handleDelete = async (item: API.PictureVO) => {
   })
   if (res.data.code === 0 && res.data.data) {
     message.success('删除成功')
-    await fetchPictures()
+    fetchPictures()
+    spaceVoStore.fetchSpaceVo()
   }else {
     message.error(res.data.message)
   }
@@ -668,7 +669,7 @@ const toCreationPage = async () => {
 
 // --- 生命周期 ---
 onMounted(async () => {
-  if (loginUserStore.loginUser?.id) {
+  if (loginUserStore.loginUser?.id && !spaceVoStore.spaceVo?.id) {
     await spaceVoStore.fetchSpaceVo()
   }
 

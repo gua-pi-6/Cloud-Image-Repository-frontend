@@ -16,7 +16,7 @@
 
     <!-- 新增：裁剪与旋转操作按钮 -->
     <div v-if="picture?.id" style="margin-top: 32px; display: flex; justify-content: center;">
-      <a-button type="default" @click="openCropModal">
+      <a-button type="primary" @click="openCropModal">
         裁剪 / 旋转图片
       </a-button>
     </div>
@@ -184,9 +184,10 @@ const handleCropConfirm = () => {
       message.warn('请先裁剪图片')
       return
     }
-    const fileName = picture.value?.name || 'cropped-image'
+    const name = picture.value?.name || 'cropped-image'
+    const fileName = name + '.png'
     const file = new File([blob], fileName, { type: 'image/png' })
-    const res = await uploadPictureUsingPost({ spaceId: useSpaceVoStore().spaceVo.id, picName: fileName }, {}, file) as any
+    const res = await uploadPictureUsingPost({ spaceId: useSpaceVoStore().spaceVo.id, picName: name }, {}, file) as any
     if (res.data.code === 0 && res.data.data) {
       picture.value = res.data.data
     }else {
@@ -207,7 +208,8 @@ const rotateRight = () => {
 }
 // 新增：旋转180°
 const rotatePlane = () => {
-  cropperRef.value.rotateRight().rotateRight()
+  cropperRef.value.rotateRight()
+  cropperRef.value.rotateRight()
 }
 
 /**
