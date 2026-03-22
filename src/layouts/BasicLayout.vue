@@ -42,9 +42,9 @@
                   </template>
                   <span>我的空间</span>
                 </a-menu-item>
-                <a-menu-item key="/teamSpace" class="side-menu-item">
+                <a-menu-item key="/creation/teamSpace" class="side-menu-item">
                   <template #icon>
-                    <CloudServerOutlined/>
+                    <TeamOutlined />
                   </template>
                   <span>团队空间</span>
                 </a-menu-item>
@@ -60,8 +60,8 @@
 
         <!-- 3. 底部 Footer -->
         <a-layout-footer class="footer">
-          <a href="https://www.codefather.cn" target="_blank">
-            编程导航 by 程序员鱼皮
+          <a href="https://guapistudio.com" target="_blank">
+            智能云图库 by 程序员瓜皮
           </a>
         </a-layout-footer>
       </a-layout>
@@ -73,25 +73,12 @@
 import { ref, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import GlobalHeader from '@/components/layout/GlobalHeader.vue';
-import { PictureOutlined, UserOutlined, SearchOutlined, CloudServerOutlined } from '@ant-design/icons-vue';
+import { PictureOutlined, UserOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons-vue';
 import gsap from 'gsap';
 
 // --- 路由逻辑 ---
 const router = useRouter();
-const route = useRoute();
-
 const selectedKeys = ref<string[]>([]);
-
-const updateSelectedKeys = () => {
-  const path = route.path;
-  if (path.startsWith('/space')) {
-    selectedKeys.value = ['/space'];
-  }else {
-    selectedKeys.value = ['/'];
-  }
-};
-
-watch(() => route.path, updateSelectedKeys, { immediate: true });
 
 const handleMenuClick = ({ key }: { key: string }) => {
   router.push(key);

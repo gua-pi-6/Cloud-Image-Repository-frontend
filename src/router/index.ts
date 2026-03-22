@@ -68,8 +68,8 @@ const router = createRouter({
       component: MySpacePage,
     },
     {
-      path: '/teamSpace',
-      name: '团队空间',
+      path: '/creation/teamSpace',
+      name: '创建团队空间',
       component:  TeamSpacePage,
     },
     {

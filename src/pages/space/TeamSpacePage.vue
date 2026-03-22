@@ -1,17 +1,13 @@
 <template>
-  <!-- 1. 移除最外层的 ConfigProvider，防止样式泄露到 Layout -->
-  <!-- 添加 ref="containerRef" 用于锁定动画作用域 -->
   <div class="page-container" ref="containerRef">
-
-    <!-- 背景装饰 (保持原样) -->
+    <!-- 背景装饰 -->
     <div class="bg-shape shape-1" ref="shape1"></div>
     <div class="bg-shape shape-2" ref="shape2"></div>
 
-    <!-- 2. 将 ConfigProvider 移到这里，只控制卡片内部的组件颜色 -->
     <a-config-provider
       :theme="{
         token: {
-          colorPrimary: '#0d9488', // 仅影响此表单内的 Antd 组件
+          colorPrimary: '#0d9488',
           borderRadius: 8,
         },
       }"
@@ -22,8 +18,8 @@
           <div class="icon-box" ref="iconRef">
             <cloud-server-outlined />
           </div>
-          <h1 class="page-title">创建私人空间</h1>
-          <p class="page-subtitle">为您的美好回忆安个家，开始您的云端创作之旅。</p>
+          <h1 class="page-title">创建团队空间</h1>
+          <p class="page-subtitle">为您的团队的美好回忆安个家，开始您的云端创作之旅。</p>
         </div>
 
         <!-- 表单区域 -->
@@ -57,7 +53,10 @@
 
           <a-form-item
             name="spaceLevel"
-            :rules="[{ required: true, message: '请选择空间等级' }]"
+            :rules="[
+              { required: true, message: '请选择空间等级' },
+              { validator: validateLevel }
+            ]"
           >
             <template #label>
               <span class="form-label">空间等级</span>
@@ -75,6 +74,14 @@
               <a-select-option :value="2">旗舰版</a-select-option>
             </a-select>
           </a-form-item>
+
+          <!-- 空间等级说明 -->
+          <div class="level-desc">
+            <div class="desc-title">空间等级说明</div>
+            <div class="desc-item"><strong>普通版：</strong>大小100.00MB，图片数量100</div>
+            <div class="desc-item"><strong>专业版：</strong>大小1000.00MB，图片数量1000</div>
+            <div class="desc-item"><strong>旗舰版：</strong>大小10000.00MB，图片数量10000</div>
+          </div>
 
           <!-- 提交按钮 -->
           <div class="actions">
@@ -99,13 +106,14 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
 import { CloudServerOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
 import gsap from 'gsap';
-import { addSpaceUsingPost } from '@/api/spaceController'
-import router from '@/router'
-import { useSpaceVoStore } from '@/stores/useSpaceVoStore'
-import { SPACE_TYPE_OPTIONS } from '@/constants/SpaceConstant'
+import { addSpaceUsingPost } from '@/api/spaceController';
+import { useSpaceVoStore } from '@/stores/useSpaceVoStore';
+
+const router = useRouter();
 
 // --- 数据状态 ---
 const loading = ref(false);
@@ -114,102 +122,87 @@ const formState = reactive({
   spaceLevel: -1,
 });
 
-// --- 引用定义 ---
-const containerRef = ref(null); // 新增：整个页面的容器引用
-const cardRef = ref(null);
-const iconRef = ref(null);
-const shape1 = ref(null);
-const shape2 = ref(null);
+// --- 表单校验 ---
+const validateLevel = async (_rule: any, value: number) => {
+  if (value === -1) {
+    return Promise.reject('请选择有效的空间等级');
+  }
+  return Promise.resolve();
+};
 
-// GSAP 上下文实例
+// --- 引用定义 ---
+const containerRef = ref<HTMLElement | null>(null);
+const cardRef = ref<HTMLElement | null>(null);
+const iconRef = ref<HTMLElement | null>(null);
+const shape1 = ref<HTMLElement | null>(null);
+const shape2 = ref<HTMLElement | null>(null);
+
 let ctx: gsap.Context;
 
 // --- 生命周期与动画 ---
 onMounted(() => {
-  // 使用 gsap.context 锁定作用域
-  // 这里的 selector 只会查找 containerRef 内部的元素，绝不会影响全局 Header
-  ctx = gsap.context(() => {
-    initAnimations();
-  }, containerRef.value);
+  if (containerRef.value) {
+    ctx = gsap.context(() => {
+      initAnimations();
+    }, containerRef.value);
+  }
 });
 
 onUnmounted(() => {
-  // 组件销毁时清理动画，防止内存泄漏或样式残留
   ctx?.revert();
 });
 
 const initAnimations = () => {
   const tl = gsap.timeline();
 
-  // 1. 背景漂浮
-  gsap.to(shape1.value, {
-    x: 50,
-    y: 80,
-    duration: 8,
-    repeat: -1,
-    yoyo: true,
-    ease: 'sine.inOut',
-  });
-  gsap.to(shape2.value, {
-    x: -30,
-    y: 40,
-    duration: 10,
-    repeat: -1,
-    yoyo: true,
-    ease: 'sine.inOut',
-    delay: 1,
-  });
+  if (shape1.value && shape2.value) {
+    gsap.to(shape1.value, {
+      x: 50, y: 80, duration: 8, repeat: -1, yoyo: true, ease: 'sine.inOut',
+    });
+    gsap.to(shape2.value, {
+      x: -30, y: 40, duration: 10, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 1,
+    });
+  }
 
-  // 2. 卡片入场
-  tl.from(cardRef.value, {
-    y: 60,
-    opacity: 0,
-    duration: 1,
-    ease: 'power3.out',
-  })
-    // 3. 图标弹跳
-    .from(iconRef.value, {
-      scale: 0,
-      rotation: -45,
-      duration: 0.6,
-      ease: 'back.out(1.7)',
-    }, '-=0.5')
-    // 4. 文字和表单顺序淡入
-    // 注意：修改了类名为 page-title 避免与全局冲突，且有了 context 保护
-    .from('.page-title, .page-subtitle, .custom-form', {
-      y: 20,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power2.out',
-    }, '-=0.4');
+  if (cardRef.value && iconRef.value) {
+    tl.from(cardRef.value, {
+      y: 60, opacity: 0, duration: 1, ease: 'power3.out',
+    })
+      .from(iconRef.value, {
+        scale: 0, rotation: -45, duration: 0.6, ease: 'back.out(1.7)',
+      }, '-=0.5')
+      // 增加 .level-desc，让说明文字也参与动画
+      .from('.page-title, .page-subtitle, .custom-form, .level-desc', {
+        y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out',
+      }, '-=0.4');
+  }
 };
 
 // --- 按钮微交互 ---
 const btnHoverEnter = (e: MouseEvent) => {
-  gsap.to(e.target, { scale: 1.02, duration: 0.2, ease: 'power1.out' });
+  if (e.target) gsap.to(e.target, { scale: 1.02, duration: 0.2, ease: 'power1.out' });
 };
 
 const btnHoverLeave = (e: MouseEvent) => {
-  gsap.to(e.target, { scale: 1, duration: 0.2, ease: 'power1.out' });
+  if (e.target) gsap.to(e.target, { scale: 1, duration: 0.2, ease: 'power1.out' });
 };
 
-// --- 业务逻辑 (保持原样) ---
+// --- 业务逻辑 ---
 const handleCreate = async (values: any) => {
   loading.value = true;
-  const params = {...values, spaceType: 1}
-  // 模拟请求延迟效果，让动画稍微展示一会（可选）
+  const params = { ...values, spaceType: 1 };
+
   try {
-    const res = await addSpaceUsingPost(params)
-    if (res.data.code === 0 && res.data.data){
-      await useSpaceVoStore().fetchSpaceVo()
-      message.success('团队空间创建成功,快去团队空间上传你的灵感吧~')
-      router.replace('/teamSpace') // 建议跳转到 /teamSpace 列表页或详情页
+    const res = await addSpaceUsingPost(params);
+    if (res.data.code === 0 && res.data.data) {
+      await useSpaceVoStore().fetchSpaceVo();
+      message.success('团队空间创建成功,快去团队空间上传你的灵感吧~');
+      router.replace('/teamSpace');
     } else {
-      message.error(res.data.message || '团队空间创建失败,请稍后再试~')
+      message.error(res.data.message || '团队空间创建失败,请稍后再试~');
     }
   } catch (e: any) {
-    message.error('网络异常，请重试')
+    message.error('网络异常，请重试');
   } finally {
     loading.value = false;
   }
@@ -220,15 +213,12 @@ const handleCreate = async (values: any) => {
 /* 页面容器 */
 .page-container {
   position: relative;
-  /* 确保占满父容器（右侧内容区），而不是 100vh 强行撑开导致滚动条 */
   height: 100%;
   min-height: 80vh;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 移除背景色设置，避免覆盖 BasicLayout 的背景 */
-  /* 如果需要特定背景，建议使用透明度或确保不影响全局 */
   background: transparent;
   overflow: hidden;
 }
@@ -241,7 +231,6 @@ const handleCreate = async (values: any) => {
   z-index: 0;
   opacity: 0.6;
 }
-
 .shape-1 {
   width: 400px;
   height: 400px;
@@ -249,7 +238,6 @@ const handleCreate = async (values: any) => {
   top: -10%;
   left: -5%;
 }
-
 .shape-2 {
   width: 300px;
   height: 300px;
@@ -267,20 +255,17 @@ const handleCreate = async (values: any) => {
   -webkit-backdrop-filter: blur(20px);
   width: 100%;
   max-width: 480px;
-  padding: 48px;
+  padding: 40px 48px;
   border-radius: 24px;
-  box-shadow:
-    0 20px 40px rgba(13, 148, 136, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 20px 40px rgba(13, 148, 136, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-/* 头部样式 - 类名修改以防冲突 */
+/* 头部样式 */
 .header-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
-
 .icon-box {
   width: 64px;
   height: 64px;
@@ -294,7 +279,6 @@ const handleCreate = async (values: any) => {
   color: white;
   box-shadow: 0 10px 20px rgba(13, 148, 136, 0.3);
 }
-
 .page-title {
   font-size: 28px;
   font-weight: 700;
@@ -302,7 +286,6 @@ const handleCreate = async (values: any) => {
   margin-bottom: 8px;
   letter-spacing: -0.5px;
 }
-
 .page-subtitle {
   color: #6b7280;
   font-size: 14px;
@@ -322,17 +305,49 @@ const handleCreate = async (values: any) => {
 
 :deep(.custom-input) {
   border-radius: 12px;
-  padding: 8px 11px;
   background-color: #f9fafb;
   border-color: #e5e7eb;
   transition: all 0.3s ease;
 }
 
 :deep(.custom-input:hover),
-:deep(.custom-input:focus-within) {
+:deep(.custom-input:focus-within),
+:deep(.ant-select:not(.ant-select-disabled):hover .ant-select-selector) {
   background-color: #fff;
-  border-color: #0d9488;
-  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+  border-color: #0d9488 !important;
+}
+:deep(.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector) {
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1) !important;
+}
+:deep(.ant-select-selector) {
+  border-radius: 12px !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* ================== 空间等级说明 ================== */
+.level-desc {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.desc-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.desc-item {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.desc-item strong {
+  font-weight: 700;
 }
 
 /* 按钮样式 */
@@ -344,7 +359,6 @@ const handleCreate = async (values: any) => {
   background: linear-gradient(90deg, #0f766e 0%, #0d9488 100%);
   border: none;
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-  margin-top: 16px;
 }
 
 .submit-btn:hover {
