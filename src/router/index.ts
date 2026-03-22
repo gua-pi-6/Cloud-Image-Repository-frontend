@@ -11,6 +11,7 @@ import AddSpacePage from '../pages/space/AddSpacePage.vue'
 import MySpacePage from '../pages/space/MySpacePage.vue'
 import SearchPicturePage from '../pages/picture/SearchPicturePage.vue'
 import ExpansionImageByImage from '../pages/picture/ExpansionImageByImage.vue'
+import TeamSpacePage from '../pages/space/TeamSpacePage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +66,11 @@ const router = createRouter({
       path: '/space',
       name: '空间详情',
       component: MySpacePage,
+    },
+    {
+      path: '/teamSpace',
+      name: '团队空间',
+      component:  TeamSpacePage,
     },
     {
       path: '/picture/search/:id',

@@ -32,15 +32,21 @@
               >
                 <a-menu-item key="/" class="side-menu-item">
                   <template #icon>
-                    <picture-outlined />
+                    <PictureOutlined />
                   </template>
                   <span>公共图库</span>
                 </a-menu-item>
                 <a-menu-item key="/space" class="side-menu-item">
                   <template #icon>
-                    <user-outlined />
+                    <UserOutlined />
                   </template>
                   <span>我的空间</span>
+                </a-menu-item>
+                <a-menu-item key="/teamSpace" class="side-menu-item">
+                  <template #icon>
+                    <CloudServerOutlined/>
+                  </template>
+                  <span>团队空间</span>
                 </a-menu-item>
               </a-menu>
             </div>
@@ -67,7 +73,7 @@
 import { ref, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import GlobalHeader from '@/components/layout/GlobalHeader.vue';
-import { PictureOutlined, UserOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { PictureOutlined, UserOutlined, SearchOutlined, CloudServerOutlined } from '@ant-design/icons-vue';
 import gsap from 'gsap';
 
 // --- 路由逻辑 ---

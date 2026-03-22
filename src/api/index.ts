@@ -5,10 +5,12 @@
 import * as health from './health'
 import * as pictureController from './pictureController'
 import * as spaceController from './spaceController'
+import * as spaceUserController from './spaceUserController'
 import * as userController from './userController'
 export default {
   health,
   pictureController,
   spaceController,
+  spaceUserController,
   userController,
 }
