@@ -18,15 +18,27 @@
                 <p class="team-desc">在这里与团队成员共享、管理高质量资产</p>
               </div>
               <div class="panel-footer">
-                <a-button
-                  type="primary"
-                  size="large"
-                  class="action-btn"
-                  @click="toCreationPage"
-                >
-                  <CloudUploadOutlined />
-                  <span>上传新作品</span>
-                </a-button>
+                <a-space>
+                  <a-button
+                    type="primary"
+                    size="large"
+                    class="action-btn"
+                    @click="toCreationPage"
+                  >
+                    <CloudUploadOutlined />
+                    <span>上传新作品</span>
+                  </a-button>
+
+                  <a-button
+                    type="primary"
+                    size="large"
+                    class="action-btn"
+                    @click="toMemberManage"
+                  >
+                    <UsergroupAddOutlined />
+                    <span>成员管理</span>
+                  </a-button>
+                </a-space>
               </div>
             </div>
           </a-col>
@@ -256,7 +268,7 @@ import {
   CloudServerOutlined, CloudUploadOutlined, DeleteOutlined, DownloadOutlined,
   EditOutlined, FileImageOutlined, TeamOutlined, SearchOutlined, FilterOutlined,
   AppstoreOutlined, CalendarOutlined, ReloadOutlined, LayoutOutlined, ShoppingOutlined,
-  SmileOutlined, PictureOutlined, ExpandOutlined,
+  SmileOutlined, PictureOutlined, ExpandOutlined, UsergroupAddOutlined
 } from '@ant-design/icons-vue'
 
 // ==========================================
@@ -365,7 +377,9 @@ const toPictureDetail = (id: number) => router.push(`/picture/${id}`)
 const handleEdit = (item: API.PictureVO) => router.push(`/creation/picture?id=${item.id}`)
 const handleImageSearch = (item: API.PictureVO) => router.push(`/picture/search/${item.id}`)
 const handleImageExpand = (item: API.PictureVO) => router.push(`/expansion/picture/${item.id}`)
-
+const toMemberManage = () => {
+  router.push(`/space/userManage/${props.id}`)
+}
 // 监听 id 的变化（当切换相邻团队时触发）
 watch(
   () => props.id,

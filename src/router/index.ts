@@ -13,6 +13,7 @@ import SearchPicturePage from '../pages/picture/SearchPicturePage.vue'
 import ExpansionImageByImage from '../pages/picture/ExpansionImageByImage.vue'
 import AddTeamSpacePage from '../pages/space/AddTeamSpacePage.vue'
 import TeamSpacePage from '../pages/space/TeamSpacePage.vue'
+import SpaceUserManage from '../pages/space/SpaceUserManage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -77,6 +78,12 @@ const router = createRouter({
       path: '/teamSpace/:id',
       name: '团队空间详情',
       component: TeamSpacePage,
+      props: true,
+    },
+    {
+      path: '/space/userManage/:id',
+      name: '空间成员管理',
+      component: SpaceUserManage,
       props: true,
     },
     {
