@@ -5,7 +5,7 @@
     </h2>
 
     <!-- 1. 上传逻辑：仅在【创建】模式（无 id）时显示 -->
-    <a-tabs v-if="!route.query?.id" v-model:activeKey="uploadType">
+    <a-tabs v-if="(!route.query?.id && !picture?.url)" v-model:activeKey="uploadType">
       <a-tab-pane key="file" tab="文件上传">
         <UploadPictureComponent :picture="picture" :onSuccess="onSuccess" />
       </a-tab-pane>

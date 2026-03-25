@@ -15,12 +15,12 @@
                   <span class="badge-emoji">👋</span>
                   <span>欢迎回来</span>
                 </div>
-                <h2 class="welcome-title">创作者工作台</h2>
+                <h2 class="welcome-title">{{ space.spaceName }}</h2>
                 <p class="welcome-desc">
                   您已累计发布了
                   <!-- 数字动画锚点 -->
                   <span class="highlight-number" ref="countRef">0</span>
-                  张作品
+                  张作品到私人空间
                 </p>
                 <div class="action-buttons">
                   <a-button
@@ -337,7 +337,6 @@ const searchCondition = computed((): API.PictureQueryRequest => ({
   tags: [],
   category: searchParams.category,
   spaceId: space.value?.id ?? undefined,
-  nullSpaceId: true,
   startEditTime: searchParams.startEditTime,
   endEditTime: searchParams.endEditTime,
 }))

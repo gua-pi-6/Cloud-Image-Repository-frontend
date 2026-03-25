@@ -24,6 +24,7 @@
                     size="large"
                     class="action-btn"
                     @click="toCreationPage"
+                    v-if="canUploadPicture"
                   >
                     <CloudUploadOutlined />
                     <span>上传新作品</span>
@@ -34,6 +35,7 @@
                     size="large"
                     class="action-btn"
                     @click="toMemberManage"
+                    v-if="canManageSpaceUser"
                   >
                     <UsergroupAddOutlined />
                     <span>成员管理</span>
@@ -218,19 +220,19 @@
                 <!-- 悬浮操作按钮组 -->
                 <div class="team-actions">
                   <a-tooltip title="编辑">
-                    <a-button @click="handleEdit(item)" shape="circle" class="icon-btn"><EditOutlined /></a-button>
+                    <a-button v-if="canEditPicture" @click="handleEdit(item)" shape="circle" class="icon-btn"><EditOutlined /></a-button>
                   </a-tooltip>
                   <a-tooltip title="下载">
-                    <a-button @click="handleDownload(item)" shape="circle" class="icon-btn"><DownloadOutlined /></a-button>
+                    <a-button v-if="canUploadPicture" @click="handleDownload(item)" shape="circle" class="icon-btn"><DownloadOutlined /></a-button>
                   </a-tooltip>
                   <a-tooltip title="以图识图">
-                    <a-button @click="handleImageSearch(item)" shape="circle" class="icon-btn"><search-outlined /></a-button>
+                    <a-button v-if="canEditPicture" @click="handleImageSearch(item)" shape="circle" class="icon-btn"><search-outlined /></a-button>
                   </a-tooltip>
                   <a-tooltip title="以图扩图">
-                    <a-button @click="handleImageExpand(item)" shape="circle" class="icon-btn"><ExpandOutlined /></a-button>
+                    <a-button v-if="canEditPicture" @click="handleImageExpand(item)" shape="circle" class="icon-btn"><ExpandOutlined /></a-button>
                   </a-tooltip>
                   <a-tooltip title="删除">
-                    <a-button @click="handleDelete(item)" shape="circle" danger class="icon-btn"><DeleteOutlined /></a-button>
+                    <a-button v-if="canDeletePicture" @click="handleDelete(item)" shape="circle" danger class="icon-btn"><DeleteOutlined /></a-button>
                   </a-tooltip>
                 </div>
               </div>
@@ -270,6 +272,7 @@ import {
   AppstoreOutlined, CalendarOutlined, ReloadOutlined, LayoutOutlined, ShoppingOutlined,
   SmileOutlined, PictureOutlined, ExpandOutlined, UsergroupAddOutlined
 } from '@ant-design/icons-vue'
+import { SPACE_PERMISSION_ENUM } from '@/constants/SpaceConstant'
 
 // ==========================================
 // 1. 基础状态与定义
@@ -352,7 +355,6 @@ const searchCondition = computed<API.PictureQueryRequest>(() => ({
   tags: [],
   category: searchParams.category,
   spaceId: props.id,
-  nullSpaceId: false,
   startEditTime: searchParams.startEditTime,
   endEditTime: searchParams.endEditTime,
 }))
@@ -370,6 +372,21 @@ const displayMaxSize = computed(() => showPictureSize(space.value?.maxSize ?? 0)
 // ==========================================
 // 4. 操作与事件方法
 // ==========================================
+
+// 定义权限检查
+const canManageSpaceUser = createPermissionChecker(SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE)
+const canUploadPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_UPLOAD)
+const canEditPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
+const canDeletePicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)
+
+// 通用权限检查函数
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (space.value.permissionList ?? []).includes(permission)
+  })
+}
+
+
 
 // 路由跳转
 const toCreationPage = () => router.push(`/creation/picture`)

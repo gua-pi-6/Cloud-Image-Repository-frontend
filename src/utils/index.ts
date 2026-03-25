@@ -1,3 +1,6 @@
+import { computed } from 'vue'
+import { SPACE_PERMISSION_ENUM } from '../constants/SpaceConstant'
+
 /**
  * 图片大小转换
  * @param size
@@ -13,6 +16,9 @@ export const showPictureSize = (size: number) => {
     return `${size}B`
   }
 }
+
+
+
 
 
 

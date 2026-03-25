@@ -352,8 +352,7 @@ const searchCondition = computed<API.PictureQueryRequest>(() => ({
   searchText: '',
   tags: [],
   category: '',
-  spaceId: null,
-  nullSpaceId: true,
+  spaceId: 0,
 }))
 const images = ref<API.PictureVO[]>([])
 
@@ -377,8 +376,6 @@ const getTagAndCategoryList = async () => {
  */
 const fetchPictures = async () => {
   loading.value = true
-  searchCondition.value.spaceId = null
-  searchCondition.value.nullSpaceId = true
   const res = await listPictureVoByPageUsingPost(searchCondition.value)
   if (res.data.code === 0 && res.data.data) {
     images.value = res.data.data.records ?? []

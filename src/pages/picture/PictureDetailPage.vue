@@ -52,12 +52,12 @@
                 免费下载
               </a-button>
               <div class="secondary-actions">
-                <a-button v-if="mustRole(loginUser.userRole)" class="half-btn" @click="handleEdit">
+                <a-button v-if="mustRole(loginUser.userRole) || canEdit" class="half-btn" @click="handleEdit">
                   <template #icon><edit-outlined /></template>
                   编辑
                 </a-button>
                 <a-button
-                  v-if="mustRole(loginUser.userRole)"
+                  v-if="mustRole(loginUser.userRole) || canDelete"
                   danger
                   class="half-btn"
                   @click="handleDelete"
@@ -123,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeftOutlined,
@@ -139,6 +139,7 @@ import { deletePictureUsingPost, getPictureVoByIdUsingGet } from '@/api/pictureC
 import { saveAs } from 'file-saver'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { showPictureSize } from '@/utils/index.ts'
+import { SPACE_PERMISSION_ENUM } from '@/constants/SpaceConstant'
 const route = useRoute()
 const router = useRouter()
 const drawerVisible = ref(false) // 控制弹框
@@ -151,6 +152,18 @@ interface PictureId {
 }
 
 const prop = defineProps<PictureId>()
+
+// 通用权限检查函数
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (picture.value.permissionList ?? []).includes(permission)
+  })
+}
+
+// 定义权限检查
+const canEdit = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
+const canDelete = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)
+
 
 /**
  * 获取图片详情
