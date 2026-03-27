@@ -16,7 +16,8 @@
 
     <!-- 2. 修改预览：仅在【修改】模式（有 id）或【已上传成功】时显示图片预览 -->
     <div v-if="picture?.url" class="edit-single-preview" style="text-align: center">
-      <img :src="picture.url" alt="预览图" style="max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1)" />
+      <img :src="picture.url" alt="预览图"
+        style="max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1)" />
     </div>
 
     <!-- 裁剪与旋转操作按钮 -->
@@ -27,73 +28,40 @@
     </div>
 
     <!-- 表单部分 -->
-    <a-form v-if="picture?.id"
-            layout="vertical"
-            :model="pictureForm"
-            @finish="editPicture"
-            style="margin-top: 20px;"
-    >
+    <a-form v-if="picture?.id" layout="vertical" :model="pictureForm" @finish="editPicture" style="margin-top: 20px;">
       <a-form-item label="图片名称" name="name">
-        <a-input v-model:value="pictureForm.name"
-                 placeholder="名称最大长度不可超过18"
-                 allowClear
-        />
+        <a-input v-model:value="pictureForm.name" placeholder="名称最大长度不可超过18" allowClear />
       </a-form-item>
 
       <a-form-item label="图片简介" name="introduction">
-        <a-textarea v-model:value="pictureForm.introduction"
-                    placeholder="请输入图片简介(可选)"
-                    :auto-size="{ minRows: 2, maxRows: 5 }"
-                    allowClear
-        />
+        <a-textarea v-model:value="pictureForm.introduction" placeholder="请输入图片简介(可选)"
+          :auto-size="{ minRows: 2, maxRows: 5 }" allowClear />
       </a-form-item>
 
       <a-form-item label="图片分类" name="category">
-        <a-auto-complete v-model:value="pictureForm.category"
-                         placeholder="请输入图片分类(可选)"
-                         allowClear
-                         :options="categoryList"
-        />
+        <a-auto-complete v-model:value="pictureForm.category" placeholder="请输入图片分类(可选)" allowClear
+          :options="categoryList" />
       </a-form-item>
 
       <a-form-item label="图片标签" name="tags">
-        <a-select v-model:value="pictureForm.tags"
-                  placeholder="请输入图片标签(可选)"
-                  mode="tags"
-                  allowClear
-                  :options="tagList"
-        />
+        <a-select v-model:value="pictureForm.tags" placeholder="请输入图片标签(可选)" mode="tags" allowClear
+          :options="tagList" />
       </a-form-item>
 
       <a-form-item style=" text-align: center;">
-        <a-button type="primary"
-                  html-type="submit"
-                  style="min-width: 60%;"
-        >
+        <a-button type="primary" html-type="submit" style="min-width: 60%;">
           {{ route.query?.id ? '保存修改' : '立即创建' }}
         </a-button>
       </a-form-item>
     </a-form>
 
     <!-- 图片裁剪与旋转弹窗 -->
-    <a-modal
-      v-model:open="isCropModalVisible"
-      title="图片裁剪与旋转"
-      width="800px"
-      :maskClosable="false"
-      @cancel="isCropModalVisible = false"
-    >
+    <a-modal v-model:open="isCropModalVisible" title="图片裁剪与旋转" width="800px" :maskClosable="false"
+      @cancel="isCropModalVisible = false">
       <div style="height: 450px; width: 100%;">
-        <vue-cropper
-          ref="cropperRef"
-          :img="cropperOptions.img"
-          :autoCrop="cropperOptions.autoCrop"
-          :fixedBox="cropperOptions.fixedBox"
-          :centerBox="cropperOptions.centerBox"
-          :canScale="cropperOptions.canScale"
-          :infoTrue="cropperOptions.infoTrue"
-          :outputType="cropperOptions.outputType"
-        />
+        <vue-cropper ref="cropperRef" :img="cropperOptions.img" :autoCrop="cropperOptions.autoCrop"
+          :fixedBox="cropperOptions.fixedBox" :centerBox="cropperOptions.centerBox" :canScale="cropperOptions.canScale"
+          :infoTrue="cropperOptions.infoTrue" :outputType="cropperOptions.outputType" />
       </div>
 
       <template #footer>
@@ -114,21 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import UploadPictureComponent from '@/components/picture/UploadPictureComponent.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  editPictureUsingPost,
-  getPictureVoByIdUsingGet,
-  listPictureTagCategoryUsingGet,
-  uploadPictureUsingPost
-} from '@/api/pictureController'
 import { message } from 'ant-design-vue'
-import UrlUploadPictureComponent from '@/components/picture/UrlUploadPictureComponent.vue'
-import { useSpaceVoStore } from '@/stores/useSpaceVoStore'
-import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import 'vue-cropper/dist/index.css'
 import { VueCropper } from 'vue-cropper'
+import { useSpaceVoStore } from '../../stores/useSpaceVoStore'
+import { editPictureUsingPost, getPictureVoByIdUsingGet, listPictureTagCategoryUsingGet, uploadPictureUsingPost } from '../../api/pictureController'
+import { useLoginUserStore } from '../../stores/useLoginUserStore'
 
 const categoryList = ref<{ value: string }[]>([])
 const tagList = ref<{ value: string }[]>([])
@@ -262,5 +223,4 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
