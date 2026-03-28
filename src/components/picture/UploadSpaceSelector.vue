@@ -51,83 +51,102 @@ import {
   GlobalOutlined,
   LockOutlined,
   TeamOutlined,
-  FolderOpenOutlined
+  FolderOpenOutlined,
 } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
-import { useSpaceVoStore } from '@/stores/useSpaceVoStore' // 引入你的登录状态仓库
+import { useSpaceVoStore } from '@/stores/useSpaceVoStore'
+
+type SpaceType = 'public' | 'private' | 'team'
+
 const spaceVoStore = useSpaceVoStore()
-// --- 定义向外暴露的事件与双向绑定 ---
+
 const props = defineProps<{
-  // 接收从父组件传来的团队列表
+  // 父组件传入的团队空间列表
   teamList?: Array<{ id: number; name?: string; spaceName?: string }>
-  // ✨新增：接收父组件通知当前用户是否拥有私人图库 (默认为 false，防止未传值时异常)
+  // 可选：父组件可直接告知是否有私人空间；未传则由 store 推断
+  hasPrivateSpace?: boolean
 }>()
-const hasPrivateSpace = computed(async () => {
-  return !!spaceVoStore.spaceVo.id;
-})
-onMounted(async () => {
-  if (!spaceVoStore.spaceVo.id) {
-    await spaceVoStore.fetchSpaceVo()
-  }
-})
 
 const emit = defineEmits<{
-  (e: 'change', payload: { type: string; teamId?: number | null }): void
+  (e: 'change', payload: { type: SpaceType; teamId?: number | null }): void
 }>()
 
-
-// --- 状态获取 ---
 const loginUserStore = useLoginUserStore()
-const isLogin = computed(() => !!loginUserStore.loginUser?.id) // 判断是否登录
-const hasTeamSpace = computed(() => props.teamList && props.teamList.length > 0) // 判断是否有团队空间
+const isLogin = computed(() => !!loginUserStore.loginUser?.id)
 
-// --- 内部状态 ---
-const activeType = ref<string>('public') // 默认选中公共图库
-const selectedTeamId = ref<number | null>(null) // 选中的团队ID
+const activeType = ref<SpaceType>('public')
+const selectedTeamId = ref<number | null>(null)
 
-// 计算属性：将父组件传来的团队列表转换为 a-select 需要的格式
 const teamOptions = computed(() => {
-  return (props.teamList || []).map(team => ({
+  return (props.teamList ?? []).map((team) => ({
     value: team.id,
-    label: team.spaceName || team.name || '未命名团队'
+    label: team.spaceName || team.name || '未命名团队',
   }))
 })
+const hasTeamSpace = computed(() => teamOptions.value.length > 0)
 
-// --- 监听状态变化，防止出现非法选中 ---
-watch(
-  [isLogin, hasTeamSpace, hasPrivateSpace],
-  async ([newIsLogin, newHasTeam, newHasPrivate]) => {
-    // 1. 如果用户退出登录，强制重置为公共图库
-    if (!newIsLogin && activeType.value !== 'public') {
-      activeType.value = 'public'
-      handleTypeChange()
-    }
-    // 2. 如果当前处于私人图库，但因为某种原因(如账号被重置)失去了私人图库，退回公共
-    else if (activeType.value === 'private' && !newHasPrivate) {
-      activeType.value = 'public'
-      handleTypeChange()
-    }
-    // 3. 如果当前处于团队空间，但失去了所有团队，根据情况退回
-    else if (activeType.value === 'team' && !newHasTeam) {
-      // 优先退回到私人图库，如果没有私人图库则退回公共
-      activeType.value = newHasPrivate ? 'private' : 'public'
-      handleTypeChange()
-    }
+const privateFromStore = computed(() => !!spaceVoStore.spaceVo?.id)
+const hasPrivateSpace = computed(() => {
+  if (typeof props.hasPrivateSpace === 'boolean') {
+    return props.hasPrivateSpace
   }
+  return privateFromStore.value
+})
+
+// 统一派发给父组件，保证输出结构稳定，便于父组件维护
+const emitChange = () => {
+  emit('change', {
+    type: activeType.value,
+    teamId: activeType.value === 'team' ? selectedTeamId.value : null,
+  })
+}
+
+/**
+ * 规范化当前选中状态，避免出现“当前项已不可用”导致的脏状态：
+ * 1) 未登录只能选 public
+ * 2) private 不可用时退回 public
+ * 3) team 不可用时优先退回 private，否则 public
+ * 4) team 可用但没选团队时，默认选第一个
+ */
+const normalizeSelection = () => {
+  const prevType = activeType.value
+  const prevTeamId = selectedTeamId.value
+
+  if (!isLogin.value) {
+    activeType.value = 'public'
+    selectedTeamId.value = null
+  } else if (activeType.value === 'private' && !hasPrivateSpace.value) {
+    activeType.value = 'public'
+    selectedTeamId.value = null
+  } else if (activeType.value === 'team' && !hasTeamSpace.value) {
+    activeType.value = hasPrivateSpace.value ? 'private' : 'public'
+    selectedTeamId.value = null
+  } else if (activeType.value === 'team') {
+    const exists = teamOptions.value.some((item) => item.value === selectedTeamId.value)
+    if (!exists) {
+      selectedTeamId.value = teamOptions.value[0]?.value ?? null
+    }
+  } else {
+    selectedTeamId.value = null
+  }
+
+  return prevType !== activeType.value || prevTeamId !== selectedTeamId.value
+}
+
+// 监听可用状态变化，自动回退/修正并同步给父组件
+watch(
+  [isLogin, hasTeamSpace, hasPrivateSpace, teamOptions],
+  () => {
+    if (normalizeSelection()) {
+      emitChange()
+    }
+  },
+  { immediate: true },
 )
 
-// --- 方法 ---
-// 切换大类
+// 切换空间类型
 const handleTypeChange = () => {
-  // 如果切回了非团队空间，清空选中的团队ID
-  if (activeType.value !== 'team') {
-    selectedTeamId.value = null
-  } else {
-    // 如果切到团队空间，且列表有值，默认选中第一个团队
-    if (teamOptions.value.length > 0 && !selectedTeamId.value) {
-      selectedTeamId.value = teamOptions.value[0].value
-    }
-  }
+  normalizeSelection()
   emitChange()
 }
 
@@ -136,13 +155,18 @@ const handleTeamChange = () => {
   emitChange()
 }
 
-// 统一向外派发事件
-const emitChange = () => {
-  emit('change', {
-    type: activeType.value,
-    teamId: activeType.value === 'team' ? selectedTeamId.value : null
-  })
-}
+onMounted(async () => {
+  // 当父组件未传 hasPrivateSpace 时，组件自行兜底拉取一次，避免 private 展示不准确
+  if (typeof props.hasPrivateSpace === 'boolean') {
+    emitChange()
+    return
+  }
+  if (isLogin.value && !spaceVoStore.spaceVo?.id) {
+    await spaceVoStore.fetchSpaceVo()
+    normalizeSelection()
+  }
+  emitChange()
+})
 </script>
 
 <style scoped lang="scss">
